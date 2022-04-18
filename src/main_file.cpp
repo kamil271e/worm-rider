@@ -1,19 +1,3 @@
-/*
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
 #define GLM_FORCE_RADIANS
 
 #include <GL/glew.h>
@@ -23,6 +7,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <glm/gtc/matrix_transform.hpp>
 #include <stdlib.h>
 #include <stdio.h>
+#include <iostream>
 #include "../lib/constants.h"
 #include "../lib/allmodels.h"
 #include "../lib/lodepng.h"
@@ -30,6 +15,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 float x_speed = 0.0f; // [radians/s]
 float z_speed = 0.0f;
+
+double x_cursor = 0.0f;
+double y_cursor = 0.0f;
+
+float x_window = 1000.0f;
+float y_window = 1000.0f;
+
+float x_change = 0;
+float z_change = 0;
+
+glm::vec3 eye;
+glm::vec3 center;
+glm::vec3 up = glm::vec3(glm::vec3(0.0f, 2.0f, 0.0f));
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -40,8 +38,8 @@ void error_callback(int error, const char* description) {
 void initOpenGLProgram(GLFWwindow* window) {
 	initShaders();
 	glEnable(GL_DEPTH_TEST);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	//************Place any code here that needs to be executed once, at the program start************
-
 }
 
 //Release resources allocated by the program
@@ -50,7 +48,16 @@ void freeOpenGLProgram(GLFWwindow* window) {
 	//************Place any code here that needs to be executed once, after the main loop ends************
 }
 
-void player_perspecitve(){
+void initCamera(){
+	eye = glm::vec3(x_change, 0.0f, z_change-10.0f);
+	center = glm::vec3(x_change - (float)(x_cursor)/x_window*10, 0.0f, 0.0f);
+}
+
+void drawObjects(glm::mat4 &P, glm::mat4 &V){
+	spLambert->use();//Activate shader program
+	glUniformMatrix4fv(spLambert->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(spLambert->u("V"), 1, false, glm::value_ptr(V));
+
 	glm::mat4 M = glm::mat4(1.0);
 	M = rotate(M, -PI/3, glm::vec3(0,1,0));
 	glUniformMatrix4fv(spLambert->u("M"), 1, false, glm::value_ptr(M));
@@ -76,19 +83,29 @@ void player_perspecitve(){
 	Models::torus.drawSolid();
 }
 
-void key_callback(GLFWwindow* window, int key,
-	int scancode, int action, int mods) {
+// First Person Perspecitve
+void FPP(GLFWwindow* window){
+	initCamera();
+	glm::mat4 V = glm::lookAt(eye, center, up);
+	glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
+	drawObjects(P,V);
 
+	glfwGetCursorPos(window, &x_cursor, &y_cursor);
+	std::cout << "X:" << x_cursor << std::endl;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_LEFT) x_speed = 1.5*PI;
-		if (key == GLFW_KEY_RIGHT) x_speed = -1.5*PI;
-		if (key == GLFW_KEY_UP) z_speed = 1.5*PI;
-		if (key == GLFW_KEY_DOWN) z_speed = -1.5*PI;
+		if (key == GLFW_KEY_A) x_speed = 1.5*PI;
+		if (key == GLFW_KEY_D) x_speed = -1.5*PI;
+		if (key == GLFW_KEY_W) z_speed = 1.5*PI;
+		if (key == GLFW_KEY_S) z_speed = -1.5*PI;
+		if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) x_speed = 0;
-		if (key == GLFW_KEY_DOWN || key == GLFW_KEY_UP) z_speed = 0;
+		if (key == GLFW_KEY_A || key == GLFW_KEY_D) x_speed = 0;
+		if (key == GLFW_KEY_W || key == GLFW_KEY_S) z_speed = 0;
 	}
 }
 
@@ -98,20 +115,10 @@ void scroll_callback(GLFWwindow* window, double xOffset, double yOffset){
 }
 
 //Drawing procedure
-void drawScene(GLFWwindow* window, float x_angle, float z_angle) {
+void drawScene(GLFWwindow* window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 V = glm::lookAt(
-		glm::vec3(x_angle, 0.0f, z_angle),
-		glm::vec3(x_angle, 0.0f, 0.0f),
-		glm::vec3(0.0f, 2.0f, 0.0f)); //DEFAULT
-	glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
-	
-	spLambert->use();//Activate shader program
-	glUniformMatrix4fv(spLambert->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(spLambert->u("V"), 1, false, glm::value_ptr(V));
-
-	player_perspecitve();
+	FPP(window);
 
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -129,7 +136,7 @@ int main(void)
 		exit(EXIT_FAILURE); 
 	}
 
-	window = glfwCreateWindow(1000, 1000, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
+	window = glfwCreateWindow(x_window, y_window, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
 
 	if (!window) //If no window is opened then close the program
 	{
@@ -145,19 +152,17 @@ int main(void)
 		fprintf(stderr, "Can't initialize GLEW: %s\n", glewGetErrorString(err));
 		exit(EXIT_FAILURE);
 	}
-
 	initOpenGLProgram(window); //Call initialization procedure
 
 	//Main application loop
-	float x_angle = 0;
-	float z_angle = 0;
 	glfwSetTime(0);
 	while (!glfwWindowShouldClose(window)) //As long as the window shouldnt be closed yet...
 	{		
-		x_angle += x_speed * glfwGetTime();
-		z_angle += z_speed * glfwGetTime();
+		x_change += x_speed * glfwGetTime();
+		z_change += z_speed * glfwGetTime();
+
 		glfwSetTime(0);
-		drawScene(window, x_angle, z_angle); //Execute drawing procedure
+		drawScene(window); //Execute drawing procedure
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
 	freeOpenGLProgram(window);
