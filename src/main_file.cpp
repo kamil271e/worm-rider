@@ -13,6 +13,7 @@
 #include "../lib/allmodels.h"
 #include "../lib/lodepng.h"
 #include "../lib/shaderprogram.h"
+#include "../lib/myCube.h"
 #include "coin.cpp"
 
 float x_speed = 0.0f; // [radians/s]
@@ -31,6 +32,8 @@ glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 
 std::vector<Coin> CoinVector;
+GLuint tex;
+ShaderProgram *sp;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -66,11 +69,36 @@ void initCoins(){
 	}
 }
 
+GLuint readTexture(const char* filename) {
+	GLuint tex;
+	glActiveTexture(GL_TEXTURE0);
+
+	//Read into computers memory
+	std::vector<unsigned char> image;   //Allocate memory 
+	unsigned width, height;   //Variables for image size
+	//Read the image
+	unsigned error = lodepng::decode(image, width, height, filename);
+
+	//Import to graphics card memory
+	glGenTextures(1, &tex); //Initialize one handle
+	glBindTexture(GL_TEXTURE_2D, tex); //Activate handle
+	//Copy image to graphics cards memory reprezented by the active handle
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
+		GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	return tex;
+}
+
+
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
+	tex = readTexture("tex/gold.png");
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	//************Place any code here that needs to be executed once, at the program start************
 }
@@ -101,13 +129,13 @@ float randomNum(float a, float b){
 
 
 void drawCoins(glm::mat4 &P, glm::mat4 &V, float coin_rotation){
-	spLambert->use();
-	glUniformMatrix4fv(spLambert->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(spLambert->u("V"), 1, false, glm::value_ptr(V));
+	spLambertTextured->use();
+	glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(spLambertTextured->u("V"), 1, false, glm::value_ptr(V));
 
 	for (int i = 0; i < 3; i++){
 		CoinVector[i].rotation = coin_rotation;
-		if (!CoinVector[i].drawCoin(eye.x, eye.z)){
+		if (!CoinVector[i].drawCoin(eye.x, eye.z, tex)){
 			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[N-8f,N+8f), z:[N,N+20f),
 			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
 			remove(CoinVector, i); 
