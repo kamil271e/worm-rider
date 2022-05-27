@@ -14,10 +14,14 @@
 #include "../lib/lodepng.h"
 #include "../lib/shaderprogram.h"
 #include "../lib/myCube.h"
+#include "../lib/utils.h"
 #include "coin.cpp"
+#include "worm.cpp"
 
 float x_speed = 0.0f; // [radians/s]
 float z_speed = 0.0f;
+float worm_wriggle_speed = 1.0f; 
+float coin_rotate_speed = 1.0f;
 
 double x_cursor = 0.0f;
 double y_cursor = 0.0f;
@@ -31,9 +35,11 @@ glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 
-std::vector<Coin> CoinVector;
 GLuint tex;
 ShaderProgram *sp;
+
+std::vector<Coin> CoinVector;
+Worm worm;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -64,41 +70,17 @@ void initCoins(){
 	float init_x[3] = {5.0f,-3.0f,0.0f};
 	float init_z[3] = {20.0f, 30.0f, 40.0f};
 	for (int i = 0; i <3; i++){
-		Coin coin(init_x[i], init_z[i]);
+		Coin coin(init_x[i], init_z[i], 0.0f, tex);
 		CoinVector.push_back(coin);
 	}
 }
 
-GLuint readTexture(const char* filename) {
-	GLuint tex;
-	glActiveTexture(GL_TEXTURE0);
-
-	//Read into computers memory
-	std::vector<unsigned char> image;   //Allocate memory 
-	unsigned width, height;   //Variables for image size
-	//Read the image
-	unsigned error = lodepng::decode(image, width, height, filename);
-
-	//Import to graphics card memory
-	glGenTextures(1, &tex); //Initialize one handle
-	glBindTexture(GL_TEXTURE_2D, tex); //Activate handle
-	//Copy image to graphics cards memory reprezented by the active handle
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, width, height, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, (unsigned char*)image.data());
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	return tex;
-}
-
-
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
+	tex = readTexture("tex/gold.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
-	tex = readTexture("tex/gold.png");
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	//************Place any code here that needs to be executed once, at the program start************
 }
@@ -114,56 +96,37 @@ void updateCamera(){
 	center = glm::vec3(x_change - (float)(x_cursor)/x_window*20, 0.0f, z_change+10);
 }
 
-// funkcja pomocnicza - usuwanie danego elementu w wektorze
-void remove(std::vector<Coin>& vec, size_t pos)
-{
-    std::vector<Coin>::iterator it = vec.begin();
-    std::advance(it, pos);
-    vec.erase(it);
-}
 
-// funkcja pomocnicza - losowanie liczby z przedzialu [a,b)
-float randomNum(float a, float b){
-	return a + (rand() / (RAND_MAX / (b-a)));
-}
-
-
-void drawCoins(glm::mat4 &P, glm::mat4 &V, float coin_rotation){
-	spLambertTextured->use();
-	glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(spLambertTextured->u("V"), 1, false, glm::value_ptr(V));
-
-	for (int i = 0; i < 3; i++){
+void drawCoins(float coin_rotation){
+	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
 		CoinVector[i].rotation = coin_rotation;
-		if (!CoinVector[i].drawCoin(eye.x, eye.z, tex)){
+		if (!CoinVector[i].drawCoin(eye, center, up)){
 			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[N-8f,N+8f), z:[N,N+20f),
 			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
 			remove(CoinVector, i); 
 			float temp_x = randomNum(CoinVector.back().x-8.0f, CoinVector.back().x+8.0f);
 			float temp_z = randomNum(CoinVector.back().z, CoinVector.back().z+20.f);
-			Coin temp_coin(temp_x, temp_z, coin_rotation);
+			Coin temp_coin(temp_x, temp_z, coin_rotation, tex);
 			CoinVector.push_back(temp_coin);
 		}
 	}	
 }
 
 // First Person Perspecitve
-void FPP(GLFWwindow* window, float coin_rotation){
-	updateCamera();
-	glm::mat4 V = glm::lookAt(eye, center, up);
-	glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
-	drawCoins(P,V,coin_rotation);
+void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation){
+	drawCoins(coin_rotation);
+	worm.drawWorm(eye, center, up, worm_rotation);
 	glfwGetCursorPos(window, &x_cursor, &y_cursor);
 	// std::cout << "X:" << x_cursor << std::endl;
 	std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
 }
 
 //Drawing procedure
-void drawScene(GLFWwindow* window, float coin_rotation) {
+void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	FPP(window, coin_rotation);
+	FPP(window, coin_rotation, worm_rotation);
 
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -201,16 +164,33 @@ int main(void)
 
 	//Main application loop
 	float coin_rotate_angle = 0;
-	float coin_rotate_speed = 1.0f;
+	std::vector <float> worm_rotation(2, 0.0f); // kąty rotacji segmentów robaka
+	int flag = 1;
 	glfwSetTime(0);
-	while (!glfwWindowShouldClose(window)) //As long as the window shouldnt be closed yet...
+	while (!glfwWindowShouldClose(window))
 	{		
+		// ruch w osi x i z
 		x_change += x_speed * glfwGetTime();
 		z_change += z_speed * glfwGetTime();
+		
+		// rotacja monet
 		coin_rotate_angle += coin_rotate_speed * glfwGetTime();
 
+		// rotacja segmentów czerwia
+		if (worm_rotation[0] >= PI/6) flag = 0;
+		if (worm_rotation[0] <= -PI/6) flag = 1;
+		if (flag){
+			worm_rotation[0] += worm_wriggle_speed * glfwGetTime();
+			worm_rotation[1] -= worm_wriggle_speed * glfwGetTime();
+		}
+		else{
+			worm_rotation[0] -= worm_wriggle_speed * glfwGetTime();
+			worm_rotation[1] += worm_wriggle_speed * glfwGetTime();
+		}
+
 		glfwSetTime(0);
-		drawScene(window, coin_rotate_angle); //Execute drawing procedure
+		updateCamera();
+		drawScene(window, coin_rotate_angle, worm_rotation);
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
 	freeOpenGLProgram(window);

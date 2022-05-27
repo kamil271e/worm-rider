@@ -9,9 +9,10 @@
 class Coin{
     public:
         float x, z, rotation;
-        Coin(float = 0.0f, float = 0.0f, float = 0.0f);
+        GLuint tex;
+        Coin(float = 0.0f, float = 0.0f, float = 0.0f, GLuint = 0);
         ~Coin();
-        bool drawCoin(float worm_x, float worm_z, GLuint &tex);
+        bool drawCoin(glm::vec3, glm::vec3, glm::vec3);
 };
 
 #endif

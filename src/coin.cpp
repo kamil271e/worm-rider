@@ -2,17 +2,24 @@
 #include "../lib/shaderprogram.h"
 
 
-Coin::Coin(float x, float z, float rotation){
+Coin::Coin(float x, float z, float rotation, GLuint tex){
     this->x = x;
     this->z = z;
     this->rotation = rotation;
+    this->tex = tex;
 }
 
 Coin::~Coin(){}
 
-bool Coin::drawCoin(float worm_x, float worm_z, GLuint &tex){
-    float distance_to_coin = glm::sqrt(glm::pow(x-worm_x,2) + glm::pow(z-worm_z,2));
-	if ( distance_to_coin > 5){
+bool Coin::drawCoin(glm::vec3 eye, glm::vec3 center, glm::vec3 up){
+    glm::mat4 V = glm::lookAt(eye, center, up);
+    glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
+    spLambertTextured->use();
+    glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));
+    glUniformMatrix4fv(spLambertTextured->u("V"), 1, false, glm::value_ptr(V));
+    float distance_to_coin = glm::sqrt(glm::pow(x-eye.x,2) + glm::pow(z-eye.z,2));
+    
+    if ( distance_to_coin > 7.5){
         // COIN JAKO ŻÓŁTY TORUS:
 		/*glm::mat4 M = glm::mat4(1.0);
 		M = glm::translate(M, glm::vec3(x, 0.5f, z));
@@ -26,8 +33,8 @@ bool Coin::drawCoin(float worm_x, float worm_z, GLuint &tex){
         glm::mat4 M = glm::mat4(1.0);
 		M = glm::translate(M, glm::vec3(x, 0.5f, z));
 		M = glm::rotate(M, rotation, glm::vec3(0,1,0));
+        M = glm::scale(M, glm::vec3(0.4f, 0.4f, 0.4f));
         glUniformMatrix4fv(spLambertTextured->u("M"), 1, false, glm::value_ptr(M));
-
 
         glEnableVertexAttribArray(spLambertTextured->a("vertex"));
         glVertexAttribPointer(spLambertTextured->a("vertex"), 4, GL_FLOAT, false, 0, myCubeVertices);
@@ -50,5 +57,5 @@ bool Coin::drawCoin(float worm_x, float worm_z, GLuint &tex){
 
         return true;
     }
-    else return false;
+    else return false; // usuwanie coina
 }
