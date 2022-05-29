@@ -131,7 +131,7 @@ void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotati
 }
 
 void drawOBJ(){
-	/*static Object monkey("obj/monkey.obj", tex);
+	/*static Object monkey("obj/monkey.obj", objTex);
 	monkey.drawObject(eye,center,up);*/
 	static Object desert("obj/desert.obj", objTex);
 	desert.drawObject(eye, center, up);

@@ -43,6 +43,7 @@ void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up){
     glm::mat4 P=glm::perspective(50.0f*PI/180.0f, 1.0f, 0.01f, 50.0f); //Wylicz macierz rzutowania
 	glm::mat4 M=glm::mat4(1.0f);
 	M = glm::translate(M, glm::vec3(0.0f,0.0f,20.0f));
+	//M = glm::scale(M, glm::vec3(0.2f, 0.2f, 0.2f)); // skalowanie
 	spLambertTextured->use();
 	glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));
 	glUniformMatrix4fv(spLambertTextured->u("V"), 1, false, glm::value_ptr(V));
