@@ -19,6 +19,7 @@
 #include "coin.cpp"
 #include "worm.cpp"
 #include "../lib/OBJ_loader.h"
+#include "object.cpp"
 
 float x_speed = 0.0f; // [radians/s]
 float z_speed = 0.0f;
@@ -36,19 +37,12 @@ float z_change = 0;
 glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
-
-GLuint tex;
 ShaderProgram *sp;
 
+GLuint tex, objTex;
 std::vector<Coin> CoinVector;
 Worm worm;
 objl::Loader loader;
-
-const unsigned int myDesertVertexCount = 14406;
-
-float myDesertVertices[myDesertVertexCount*4];
-float myDesertNormals[myDesertVertexCount*4];
-float myDesertTexCoords[myDesertVertexCount*2];
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -84,147 +78,24 @@ void initCoins(){
 	}
 }
 
-void loadOBJ(){
-	// Initialize Loader
-	objl::Loader Loader;
-
-	// Load .obj File
-	bool loadout = Loader.LoadFile("desert.obj");
-
-	// Check to see if it loaded
-
-	// If so continue
-	if (loadout)
-	{
-		// Create/Open e1Out.txt
-		std::ofstream file("e1Out.txt");
-
-		// Go through each loaded mesh and out its contents
-		for (int i = 0; i < Loader.LoadedMeshes.size(); i++)
-		{
-			// Copy one of the loaded meshes to be our current mesh
-			objl::Mesh curMesh = Loader.LoadedMeshes[i];
-
-			// Print Mesh Name
-			file << "Mesh " << i << ": " << curMesh.MeshName << "\n";
-
-			// Print Vertices
-			file << "Vertices:\n";
-
-			// Go through each vertex and print its number,
-			//  position, normal, and texture coordinate
-			for (int j = 0; j < curMesh.Vertices.size(); j++)
-			{
-				file << "V" << j << ": " <<
-					"P(" << curMesh.Vertices[j].Position.X << ", " << curMesh.Vertices[j].Position.Y << ", " << curMesh.Vertices[j].Position.Z << ") " <<
-					"N(" << curMesh.Vertices[j].Normal.X << ", " << curMesh.Vertices[j].Normal.Y << ", " << curMesh.Vertices[j].Normal.Z << ") " <<
-					"TC(" << curMesh.Vertices[j].TextureCoordinate.X << ", " << curMesh.Vertices[j].TextureCoordinate.Y << ")\n";
-			}
-
-			// Print Indices
-			file << "Indices:\n";
-
-			// Go through every 3rd index and print the
-			//	triangle that these indices represent
-			for (int j = 0; j < curMesh.Indices.size(); j += 3)
-			{
-				file << "T" << j / 3 << ": " << curMesh.Indices[j] << ", " << curMesh.Indices[j + 1] << ", " << curMesh.Indices[j + 2] << "\n";
-			}
-
-			// Print Material
-			file << "Material: " << curMesh.MeshMaterial.name << "\n";
-			file << "Ambient Color: " << curMesh.MeshMaterial.Ka.X << ", " << curMesh.MeshMaterial.Ka.Y << ", " << curMesh.MeshMaterial.Ka.Z << "\n";
-			file << "Diffuse Color: " << curMesh.MeshMaterial.Kd.X << ", " << curMesh.MeshMaterial.Kd.Y << ", " << curMesh.MeshMaterial.Kd.Z << "\n";
-			file << "Specular Color: " << curMesh.MeshMaterial.Ks.X << ", " << curMesh.MeshMaterial.Ks.Y << ", " << curMesh.MeshMaterial.Ks.Z << "\n";
-			file << "Specular Exponent: " << curMesh.MeshMaterial.Ns << "\n";
-			file << "Optical Density: " << curMesh.MeshMaterial.Ni << "\n";
-			file << "Dissolve: " << curMesh.MeshMaterial.d << "\n";
-			file << "Illumination: " << curMesh.MeshMaterial.illum << "\n";
-			file << "Ambient Texture Map: " << curMesh.MeshMaterial.map_Ka << "\n";
-			file << "Diffuse Texture Map: " << curMesh.MeshMaterial.map_Kd << "\n";
-			file << "Specular Texture Map: " << curMesh.MeshMaterial.map_Ks << "\n";
-			file << "Alpha Texture Map: " << curMesh.MeshMaterial.map_d << "\n";
-			file << "Bump Map: " << curMesh.MeshMaterial.map_bump << "\n";
-
-			// Leave a space to separate from the next mesh
-			file << "\n";
-		}
-
-		// Close File
-		file.close();
-	}
-	// If not output an error
-	else
-	{
-		// Create/Open e1Out.txt
-		std::ofstream file("e1Out.txt");
-
-		// Output Error
-		file << "Failed to Load File. May have failed to find it or it was not an .obj file.\n";
-
-		// Close File
-		file.close();
-	}
-
-}
-
-void loadDesert(){
-	bool loadout = loader.LoadFile("obj/desert.obj");
-	if (loadout){
-		std::cout << "Made it" << std::endl;
-		std::cout << loader.LoadedMeshes[0].Vertices.size() << std::endl;
-		for(int i = 0; i < myDesertVertexCount; i++){
-			
-			myDesertVertices[i*4] = loader.LoadedVertices[i].Position.X;
-			myDesertVertices[i*4+1] = loader.LoadedVertices[i].Position.Y;
-			myDesertVertices[i*4+2] = loader.LoadedVertices[i].Position.Z;
-			myDesertVertices[i*4+3] = 1.0f;
-
-			myDesertNormals[i*4] = loader.LoadedVertices[i].Normal.X;
-			myDesertNormals[i*4+1] = loader.LoadedVertices[i].Normal.Y;
-			myDesertNormals[i*4+2] = loader.LoadedVertices[i].Normal.Z;
-			myDesertNormals[i*4+3] = 0.0f;
-
-			myDesertTexCoords[i*4] = loader.LoadedVertices[i].TextureCoordinate.X;
-			myDesertTexCoords[i*4+1] = loader.LoadedVertices[i].TextureCoordinate.Y;
-
-			std::cout << i << std::endl;
-		}
-		/*objl::Mesh curMesh = loader.LoadedMeshes[0];
-		for (int i = 0; i < myDesertVertexCount; i++){
-			myDesertVertices[i*4] = curMesh.Vertices[i].Position.X;
-			myDesertVertices[i*4+1] = curMesh.Vertices[i].Position.Y;
-			myDesertVertices[i*4+2] = curMesh.Vertices[i].Position.Z;
-			myDesertVertices[i*4+3] = 1.0f;
-
-			myDesertNormals[i*4] = curMesh.Vertices[i].Normal.X;
-			myDesertNormals[i*4+1] = curMesh.Vertices[i].Normal.Y;
-			myDesertNormals[i*4+2] = curMesh.Vertices[i].Normal.Z;
-			myDesertNormals[i*4+3] = 0.0f;
-
-			myDesertTexCoords[i*4] = curMesh.Vertices[i].TextureCoordinate.X;
-			myDesertTexCoords[i*4+1] = curMesh.Vertices[i].TextureCoordinate.Y;
-
-			std::cout << i << std::endl;
-		}*/
-	}
-}
-
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	tex = readTexture("tex/gold.png");
+	objTex = readTexture("tex/metal.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
-	//loadDesert();
+	sp=new ShaderProgram("v_lamberttextured.glsl",NULL,"f_lamberttextured.glsl");
+	glfwSetKeyCallback(window, key_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	//************Place any code here that needs to be executed once, at the program start************
 }
 
 //Release resources allocated by the program
 void freeOpenGLProgram(GLFWwindow* window) {
     freeShaders();
+	delete sp;
 	//************Place any code here that needs to be executed once, after the main loop ends************
 }
 
@@ -232,7 +103,6 @@ void updateCamera(){
 	eye = glm::vec3(x_change, 3.0f, z_change);
 	center = glm::vec3(x_change - (float)(x_cursor)/x_window*20, 0.0f, z_change+10);
 }
-
 
 void drawCoins(float coin_rotation){
 	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
@@ -254,8 +124,17 @@ void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotati
 	drawCoins(coin_rotation);
 	worm.drawWorm(eye, center, up, worm_rotation);
 	glfwGetCursorPos(window, &x_cursor, &y_cursor);
-	// std::cout << "X:" << x_cursor << std::endl;
-	// std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
+	//std::cout << "X:" << x_cursor << std::endl;
+	std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
+}
+
+void drawOBJ(){
+	static Object monkey("obj/monkey.obj", objTex);
+	glm::vec3 tmp = glm::vec3(eye.x, eye.y, eye.z-5.0f);
+	monkey.drawObject(tmp,center,up);
+	/*static Object desert("obj/desert.obj", objTex);
+	glm::vec3 tmp = glm::vec3(eye.x, eye.y, eye.z-50.0f);
+	desert.drawObject(tmp, center, up);*/
 }
 
 //Drawing procedure
@@ -263,10 +142,9 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	FPP(window, coin_rotation, worm_rotation);
+	drawOBJ();
+	//FPP(window, coin_rotation, worm_rotation);
 
-	glfwSetKeyCallback(window, key_callback);
-	glfwSetScrollCallback(window, scroll_callback);
 	glfwSwapBuffers(window);	
 }
 
