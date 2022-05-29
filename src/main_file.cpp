@@ -81,7 +81,7 @@ void initCoins(){
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	tex = readTexture("tex/gold.png");
-	objTex = readTexture("tex/metal.png");
+	objTex = readTexture("tex/sand.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
@@ -95,6 +95,8 @@ void initOpenGLProgram(GLFWwindow* window) {
 //Release resources allocated by the program
 void freeOpenGLProgram(GLFWwindow* window) {
     freeShaders();
+	glDeleteTextures(1,&tex);
+	glDeleteTextures(1,&objTex);
 	delete sp;
 	//************Place any code here that needs to be executed once, after the main loop ends************
 }
@@ -129,12 +131,10 @@ void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotati
 }
 
 void drawOBJ(){
-	static Object monkey("obj/monkey.obj", objTex);
-	glm::vec3 tmp = glm::vec3(eye.x, eye.y, eye.z-5.0f);
-	monkey.drawObject(tmp,center,up);
-	/*static Object desert("obj/desert.obj", objTex);
-	glm::vec3 tmp = glm::vec3(eye.x, eye.y, eye.z-50.0f);
-	desert.drawObject(tmp, center, up);*/
+	/*static Object monkey("obj/monkey.obj", tex);
+	monkey.drawObject(eye,center,up);*/
+	static Object desert("obj/desert.obj", objTex);
+	desert.drawObject(eye, center, up);
 }
 
 //Drawing procedure
@@ -143,7 +143,7 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 	glClearColor(0, 0, 0.15, 1.0f);
 
 	drawOBJ();
-	//FPP(window, coin_rotation, worm_rotation);
+	FPP(window, coin_rotation, worm_rotation);
 
 	glfwSwapBuffers(window);	
 }
