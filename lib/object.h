@@ -10,7 +10,7 @@ class Object{
         GLuint tex;
         Object(std::string, GLuint);
         ~Object();
-        void drawObject(glm::vec3, glm::vec3, glm::vec3);
+        void drawObject(glm::vec3, glm::vec3, glm::vec3, float, float, float);
 };
 
 #endif

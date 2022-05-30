@@ -38,11 +38,11 @@ Object::Object(std::string path, GLuint tex){
 
 Object::~Object(){}
 
-void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up){
+void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, float x, float y, float z){
     glm::mat4 V = glm::lookAt(eye, center, up);
     glm::mat4 P=glm::perspective(50.0f*PI/180.0f, 1.0f, 0.01f, 50.0f); //Wylicz macierz rzutowania
 	glm::mat4 M=glm::mat4(1.0f);
-	M = glm::translate(M, glm::vec3(0.0f,0.0f,20.0f));
+	M = glm::translate(M, glm::vec3(x,0.0f,z));
 	//M = glm::scale(M, glm::vec3(0.2f, 0.2f, 0.2f)); // skalowanie
 	spLambertTextured->use();
 	glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));

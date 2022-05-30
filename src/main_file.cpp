@@ -43,6 +43,7 @@ GLuint tex, objTex;
 std::vector<Coin> CoinVector;
 Worm worm;
 objl::Loader loader;
+float desert_size = 15.0f;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -131,10 +132,12 @@ void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotati
 }
 
 void drawOBJ(){
-	/*static Object monkey("obj/monkey.obj", objTex);
-	monkey.drawObject(eye,center,up);*/
 	static Object desert("obj/desert.obj", objTex);
-	desert.drawObject(eye, center, up);
+	for (int i = 0; i < 5; i++){
+		for (int j = 0; j < 8; j++){
+			desert.drawObject(eye, center, up, (j-3)*desert_size+(int)(eye.x/desert_size)*desert_size, 0, desert_size*i+(int)(eye.z/desert_size)*desert_size);
+		}
+	}
 }
 
 //Drawing procedure
@@ -160,6 +163,7 @@ int main(void)
 	}
 
 	window = glfwCreateWindow(x_window, y_window, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
+
 
 	if (!window) //If no window is opened then close the program
 	{
