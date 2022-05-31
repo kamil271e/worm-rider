@@ -11,7 +11,6 @@
 #include <vector>
 #include <fstream>
 #include "../lib/constants.h"
-#include "../lib/allmodels.h"
 #include "../lib/lodepng.h"
 #include "../lib/shaderprogram.h"
 #include "../lib/myCube.h"

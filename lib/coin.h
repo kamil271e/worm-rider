@@ -2,7 +2,6 @@
 #define COIN_H
 
 #include "model.h"
-#include "torus.h"
 #include "cube.h"
 #include <glm/glm.hpp>
 
