@@ -6,7 +6,6 @@
 Object::Object(std::string path, GLuint tex){
     objl::Loader loader;
     bool loadout = loader.LoadFile(path);
-    std::cout << loadout << std::endl;
 
     if (loadout){
         std::cout << vertexCount << std::endl;
@@ -38,18 +37,19 @@ Object::Object(std::string path, GLuint tex){
 
 Object::~Object(){}
 
-void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, float x, float y, float z){
-    glm::mat4 V = glm::lookAt(eye, center, up);
+void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, glm::vec3 coords, glm::vec3 rot, glm::vec3 scal){
+    glm::mat4 V=glm::lookAt(eye, center, up);
     glm::mat4 P=glm::perspective(50.0f*PI/180.0f, 1.0f, 0.01f, 50.0f); //Wylicz macierz rzutowania
 	glm::mat4 M=glm::mat4(1.0f);
-	M = glm::translate(M, glm::vec3(x,0.0f,z));
-	//M = glm::scale(M, glm::vec3(0.2f, 0.2f, 0.2f)); // skalowanie
+	M = glm::translate(M, glm::vec3(coords.x, coords.y, coords.z));
+	M = glm::rotate(M, rot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+	M = glm::rotate(M, rot.y, glm::vec3(0.0f, 1.0, 0.0f));
+	M = glm::rotate(M, rot.z, glm::vec3(0.0f, 0.0f, 1.0));
+	M = glm::scale(M, glm::vec3(scal.x, scal.y, scal.z));
 	spLambertTextured->use();
 	glUniformMatrix4fv(spLambertTextured->u("P"), 1, false, glm::value_ptr(P));
 	glUniformMatrix4fv(spLambertTextured->u("V"), 1, false, glm::value_ptr(V));
 	glUniformMatrix4fv(spLambertTextured->u("M"),1,false,glm::value_ptr(M));
-	//glUniform1i(spLambertTextured->u("textureMap0"),0);
-	//glUniform1i(spLambertTextured->u("textureMap1"),1);
 
     glEnableVertexAttribArray(spLambertTextured->a("vertex"));  //Włącz przesyłanie danych do atrybutu vertex
     glVertexAttribPointer(spLambertTextured->a("vertex"),4,GL_FLOAT,false,0,vertices); //Wskaż tablicę z danymi dla atrybutu vertex

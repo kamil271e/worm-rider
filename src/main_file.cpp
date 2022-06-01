@@ -23,7 +23,7 @@
 float x_speed = 0.0f; // [radians/s]
 float z_speed = 0.0f;
 float worm_wriggle_speed = 1.0f; 
-float coin_rotate_speed = 1.0f;
+float coin_rotate_speed = 2.0f;
 
 double x_cursor = 0.0f;
 double y_cursor = 0.0f;
@@ -121,30 +121,34 @@ void drawCoins(float coin_rotation){
 	}	
 }
 
-// First Person Perspecitve
-void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation){
-	drawCoins(coin_rotation);
-	worm.drawWorm(eye, center, up, worm_rotation);
-	glfwGetCursorPos(window, &x_cursor, &y_cursor);
-	//std::cout << "X:" << x_cursor << std::endl;
-	std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
-}
-
-void drawOBJ(){
+void drawDesert(){
 	static Object desert("obj/desert.obj", objTex);
 	for (int i = 0; i < 5; i++){
 		for (int j = 0; j < 8; j++){
-			desert.drawObject(eye, center, up, (j-3)*desert_size+(int)(eye.x/desert_size)*desert_size, 0, desert_size*i+(int)(eye.z/desert_size)*desert_size);
+			glm::vec3 pos = glm::vec3((j-3)*desert_size+(int)(eye.x/desert_size)*desert_size, 0, desert_size*i+(int)(eye.z/desert_size)*desert_size);
+			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f));
 		}
 	}
 }
+
+// First Person Perspecitve
+void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation){
+	
+	worm.drawWorm(eye, center, up, worm_rotation);
+	drawCoins(coin_rotation);
+	drawDesert();
+	glfwGetCursorPos(window, &x_cursor, &y_cursor);
+	//std::cout << "X:" << x_cursor << std::endl;
+	//std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
+}
+
+
 
 //Drawing procedure
 void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	drawOBJ();
 	FPP(window, coin_rotation, worm_rotation);
 
 	glfwSwapBuffers(window);	
