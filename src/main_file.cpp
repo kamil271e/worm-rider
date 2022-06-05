@@ -22,6 +22,8 @@
 
 float x_speed = 0.0f; // [radians/s]
 float z_speed = 0.0f;
+float x_max_speed = 1.5*PI; // [radians/s]
+float z_max_speed = 1.5*PI;
 float worm_wriggle_speed = 1.0f; 
 float coin_rotate_speed = 2.0f;
 
@@ -49,18 +51,30 @@ void error_callback(int error, const char* description) {
 	fputs(description, stderr);
 }
 
+int w_pressed=0, a_pressed=0, d_pressed=0;
+void update_movement(){
+	if (w_pressed && z_speed <= z_max_speed) z_speed += 1.5*PI/100;
+	else if (!w_pressed && z_speed > 0) z_speed -= 1.5*PI/20;
+	else if (z_speed < 0) z_speed = 0;
+	if (d_pressed && z_speed > 0 && x_speed >= -x_max_speed) x_speed -= 1.5*PI/100;
+	else if (x_speed < 0 && (!z_speed || (!d_pressed && !a_pressed))) x_speed += 1.5*PI/20;
+	if (a_pressed && z_speed > 0 && x_speed <= x_max_speed) x_speed += 1.5*PI/100;
+	else if (x_speed > 0 && (!z_speed || (!a_pressed && !d_pressed))) x_speed -= 1.5*PI/20;
+}
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		if (key == GLFW_KEY_A) x_speed = 1.5*PI;
-		if (key == GLFW_KEY_D) x_speed = -1.5*PI;
-		if (key == GLFW_KEY_W) z_speed = 1.5*PI;
-		if (key == GLFW_KEY_S) z_speed = -1.5*PI;
+		if (key == GLFW_KEY_A) a_pressed=1;
+		if (key == GLFW_KEY_D) d_pressed=1;
+		if (key == GLFW_KEY_W) w_pressed=1;
+		//if (key == GLFW_KEY_S && z_speed >= -z_max_speed) z_speed += -1.5*PI/10;
 		if (key == GLFW_KEY_ESCAPE) glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_A || key == GLFW_KEY_D) x_speed = 0;
-		if (key == GLFW_KEY_W || key == GLFW_KEY_S) z_speed = 0;
+		if (key == GLFW_KEY_A) a_pressed=0;
+		if (key == GLFW_KEY_D) d_pressed=0;
+		if (key == GLFW_KEY_W) w_pressed=0;
 	}
 }
 
@@ -199,19 +213,22 @@ int main(void)
 		coin_rotate_angle += coin_rotate_speed * glfwGetTime();
 
 		// rotacja segmentów czerwia
-		if (worm_rotation[0] >= PI/6) flag = 0;
-		if (worm_rotation[0] <= -PI/6) flag = 1;
-		if (flag){
-			worm_rotation[0] += worm_wriggle_speed * glfwGetTime();
-			worm_rotation[1] -= worm_wriggle_speed * glfwGetTime();
-		}
-		else{
-			worm_rotation[0] -= worm_wriggle_speed * glfwGetTime();
-			worm_rotation[1] += worm_wriggle_speed * glfwGetTime();
+		if (abs(x_speed) > 0.1 || z_speed > 0.1){
+			if (worm_rotation[0] >= PI/6) flag = 0;
+			if (worm_rotation[0] <= -PI/6) flag = 1;
+			if (flag){
+				worm_rotation[0] += worm_wriggle_speed * glfwGetTime();
+				worm_rotation[1] -= worm_wriggle_speed * glfwGetTime();
+			}
+			else{
+				worm_rotation[0] -= worm_wriggle_speed * glfwGetTime();
+				worm_rotation[1] += worm_wriggle_speed * glfwGetTime();
+			}
 		}
 
 		glfwSetTime(0);
 		updateCamera();
+		update_movement();
 		drawScene(window, coin_rotate_angle, worm_rotation);
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
