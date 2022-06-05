@@ -60,6 +60,7 @@ void update_movement(){
 	else if (x_speed < 0 && (!z_speed || (!d_pressed && !a_pressed))) x_speed += 1.5*PI/20;
 	if (a_pressed && z_speed > 0 && x_speed <= x_max_speed) x_speed += 1.5*PI/100;
 	else if (x_speed > 0 && (!z_speed || (!a_pressed && !d_pressed))) x_speed -= 1.5*PI/20;
+	if (!d_pressed && !a_pressed && abs(x_speed) < 0.2) x_speed = 0;
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
