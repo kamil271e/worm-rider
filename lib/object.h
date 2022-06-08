@@ -7,10 +7,10 @@ class Object{
     public:
         float *vertices, *normals, *texCoords;
         int vertexCount;
-        GLuint tex;
-        Object(std::string, GLuint);
+        GLuint tex, tex_reflect;
+        Object(std::string, GLuint=0, GLuint=0);
         ~Object();
-        void drawObject(glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3);
+        void drawObject(glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, ShaderProgram*);
 };
 
 #endif

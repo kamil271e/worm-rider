@@ -5,12 +5,12 @@ Worm::Worm(){}
 
 Worm::~Worm(){}
 
-void Worm::drawWorm(glm::vec3 eye, glm::vec3 center, glm::vec3 up, std::vector<float> segm_rotations){
+void Worm::drawWorm(glm::vec3 eye, glm::vec3 center, glm::vec3 up, std::vector<float> segm_rotations, ShaderProgram* sp){
 	glm::mat4 V = glm::lookAt(eye, center, up);
     glm::mat4 P = glm::perspective(glm::radians(50.0f), 1.0f, 1.0f, 50.0f);
-	spLambert->use();
-	glUniformMatrix4fv(spLambert->u("P"), 1, false, glm::value_ptr(P));
-	glUniformMatrix4fv(spLambert->u("V"), 1, false, glm::value_ptr(V));
+	sp->use();
+	glUniformMatrix4fv(sp->u("P"), 1, false, glm::value_ptr(P));
+	glUniformMatrix4fv(sp->u("V"), 1, false, glm::value_ptr(V));
     
     glm::mat4 M;
 	float heights[2] = {1.0f, -1.0f};
@@ -22,7 +22,7 @@ void Worm::drawWorm(glm::vec3 eye, glm::vec3 center, glm::vec3 up, std::vector<f
 		M = glm::rotate(M, segm_rotations[i], glm::vec3(0.0f, 0.0f, 1.0f)); // "wicie się" segmentu węża
 		M = glm::translate(M, glm::vec3(0.0f, heights[i], 2.0f)); // pozycja
 		M = glm::scale(M, glm::vec3(0.3f, 1.0f, 0.3f)); // skalowanie
-		glUniformMatrix4fv(spLambert->u("M"), 1, false, glm::value_ptr(M));
+		glUniformMatrix4fv(sp->u("M"), 1, false, glm::value_ptr(M));
 		Models::cube.drawSolid();
 	}
 }

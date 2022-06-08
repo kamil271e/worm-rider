@@ -38,9 +38,8 @@ float z_change = 0;
 glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
-ShaderProgram *sp;
 
-GLuint tex, objTex;
+GLuint sandTex, goldTex, skyTex;
 std::vector<Coin> CoinVector;
 Worm worm;
 objl::Loader loader;
@@ -88,31 +87,32 @@ void initCoins(){
 	float init_x[3] = {5.0f,-3.0f,0.0f};
 	float init_z[3] = {20.0f, 30.0f, 40.0f};
 	for (int i = 0; i <3; i++){
-		Coin coin(init_x[i], init_z[i], 0.0f, tex);
+		Coin coin(init_x[i], init_z[i], 0.0f, goldTex);
 		CoinVector.push_back(coin);
 	}
 }
 
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
-	tex = readTexture("tex/gold.png");
-	objTex = readTexture("tex/sand.png");
+	goldTex = readTexture("tex/gold.png");
+	sandTex = readTexture("tex/sand.png");
+	skyTex = readTexture("tex/sky.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
-	sp=new ShaderProgram("v_lamberttextured.glsl",NULL,"f_lamberttextured.glsl");
+	
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
-	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 
 //Release resources allocated by the program
 void freeOpenGLProgram(GLFWwindow* window) {
     freeShaders();
-	glDeleteTextures(1,&tex);
-	glDeleteTextures(1,&objTex);
-	delete sp;
+	glDeleteTextures(1,&goldTex);
+	glDeleteTextures(1,&sandTex);
+	glDeleteTextures(1,&skyTex);
 	//************Place any code here that needs to be executed once, after the main loop ends************
 }
 
@@ -124,24 +124,24 @@ void updateCamera(){
 void drawCoins(float coin_rotation){
 	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
 		CoinVector[i].rotation = coin_rotation;
-		if (!CoinVector[i].drawCoin(eye, center, up)){
+		if (!CoinVector[i].drawCoin(eye, center, up, spPhong)){
 			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[N-8f,N+8f), z:[N,N+20f),
 			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
 			remove(CoinVector, i); 
 			float temp_x = randomNum(CoinVector.back().x-8.0f, CoinVector.back().x+8.0f);
 			float temp_z = randomNum(CoinVector.back().z, CoinVector.back().z+20.f);
-			Coin temp_coin(temp_x, temp_z, coin_rotation, tex);
+			Coin temp_coin(temp_x, temp_z, coin_rotation, goldTex, skyTex);
 			CoinVector.push_back(temp_coin);
 		}
 	}	
 }
 
 void drawDesert(){
-	static Object desert("obj/desert.obj", objTex);
+	static Object desert("obj/desert.obj", sandTex);
 	for (int i = 0; i < 5; i++){
 		for (int j = 0; j < 8; j++){
 			glm::vec3 pos = glm::vec3((j-3)*desert_size+(int)(eye.x/desert_size)*desert_size, 0, desert_size*i+(int)(eye.z/desert_size)*desert_size);
-			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f));
+			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
 		}
 	}
 }
@@ -149,7 +149,7 @@ void drawDesert(){
 // First Person Perspecitve
 void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation){
 	
-	worm.drawWorm(eye, center, up, worm_rotation);
+	worm.drawWorm(eye, center, up, worm_rotation, spLambert);
 	drawCoins(coin_rotation);
 	drawDesert();
 	glfwGetCursorPos(window, &x_cursor, &y_cursor);

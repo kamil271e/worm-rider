@@ -25,6 +25,7 @@ extern ShaderProgram *spLambert;
 extern ShaderProgram* spTextured;
 extern ShaderProgram* spColored;
 extern ShaderProgram* spLambertTextured;
+extern ShaderProgram* spPhong;
 
 void initShaders();
 void freeShaders();
