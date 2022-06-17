@@ -48,8 +48,8 @@ void initCoins(){
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	goldTex = readTexture("tex/gold.png");
-	sandTex = readTexture("tex/sand.png");
-	skyTex = readTexture("tex/UnearthlyRed4k.png");
+	sandTex = readTexture("tex/pink_sand.png"); // lepiej cos ciemniejszego
+	skyTex = readTexture("tex/red_sky.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
@@ -90,7 +90,7 @@ void drawCoins(float coin_rotation){
 
 void drawDesert(){
 	static Object desert("obj/desert.obj", sandTex);
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < 6; i++){
 		for (int j = 0; j < 8; j++){
 			glm::vec3 pos = glm::vec3((j-3)*desert_size+(int)(eye.x/desert_size)*desert_size, 0, desert_size*i+(int)(eye.z/desert_size)*desert_size);
 			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
@@ -100,8 +100,8 @@ void drawDesert(){
 }
 
 void drawSkyBox(){
-	static Object skybox("obj/dome.obj", skyTex);
-	skybox.drawObject(eye, center, up, glm::vec3(0.0f,0.0f,30.0f), glm::vec3(0.0f), glm::vec3(0.3f), spLambertTextured);
+	static Object skybox("obj/dome.obj", skyTex, 0, true);
+	skybox.drawObject(eye, center, up, glm::vec3(eye.x,-5.0f,eye.z+20.0f), glm::vec3(0.0f), glm::vec3(1.6f), spTextured);
 }
 
 //Drawing procedure

@@ -3,7 +3,7 @@
 #include "../lib/OBJ_loader.h"
 #include <string>
 
-Object::Object(std::string path, GLuint tex, GLuint tex_reflect){
+Object::Object(std::string path, GLuint tex, GLuint tex_reflect, bool inside){
     objl::Loader loader;
     bool loadout = loader.LoadFile(path);
 
@@ -20,9 +20,16 @@ Object::Object(std::string path, GLuint tex, GLuint tex_reflect){
 			myObjVertices[i*4+2] = loader.LoadedVertices[i].Position.Z;
 			myObjVertices[i*4+3] = 1.0f;
 
-			myObjNormals[i*4] = loader.LoadedVertices[i].Normal.X;
-			myObjNormals[i*4+1] = loader.LoadedVertices[i].Normal.Y;
-			myObjNormals[i*4+2] = loader.LoadedVertices[i].Normal.Z;
+			if (inside){
+				myObjNormals[i*4] = 1 - loader.LoadedVertices[i].Normal.X;
+				myObjNormals[i*4+1] = 1 - loader.LoadedVertices[i].Normal.Y;
+				myObjNormals[i*4+2] = 1 - loader.LoadedVertices[i].Normal.Z;
+			}
+			else{
+				myObjNormals[i*4] = loader.LoadedVertices[i].Normal.X;
+				myObjNormals[i*4+1] = loader.LoadedVertices[i].Normal.Y;
+				myObjNormals[i*4+2] = loader.LoadedVertices[i].Normal.Z;
+			}
 			myObjNormals[i*4+3] = 0.0f;
 
 			myObjTexCoords[i*2] = loader.LoadedVertices[i].TextureCoordinate.X;
