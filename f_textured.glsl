@@ -8,6 +8,13 @@ out vec4 pixelColor; //Output variable of the fragment shader. (Almost) final pi
 //Varying variables
 in vec2 i_tc;
 
+//fog
+in float visibility;
+
 void main(void) {
 	pixelColor=texture(tex,i_tc);
+
+	// fog
+    vec3 skyColor = vec3(0.5, 0.5, 0.5);
+    pixelColor=mix(vec4(skyColor,1.0), pixelColor, visibility);
 }
