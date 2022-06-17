@@ -16,6 +16,6 @@ void main(void) {
 	pixelColor=vec4(color.rgb*i_nl,color.a);
 
     // fog
-    vec3 skyColor = vec3(0.5, 0.5, 0.5);
+    vec3 skyColor = vec3(42/255,11/255,8/255);
     pixelColor=mix(vec4(skyColor,1.0), pixelColor, visibility);
 }

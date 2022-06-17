@@ -15,6 +15,6 @@ void main(void) {
 	pixelColor=texture(tex,i_tc);
 
 	// fog
-    vec3 skyColor = vec3(0.5, 0.5, 0.5);
-    pixelColor=mix(vec4(skyColor,1.0), pixelColor, visibility);
+    //vec3 skyColor = vec3(0.2, 0.2, 0.2);
+    //pixelColor=mix(vec4(skyColor,1.0), pixelColor, visibility);
 }
