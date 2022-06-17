@@ -54,7 +54,7 @@ void initCoins(){
 void initOpenGLProgram(GLFWwindow* window) {
 	goldTex = readTexture("tex/gold.png");
 	sandTex = readTexture("tex/sand.png");
-	skyTex = readTexture("tex/sky.png");
+	skyTex = readTexture("tex/UnearthlyRed4k.png");
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
@@ -94,6 +94,7 @@ void drawCoins(float coin_rotation){
 	}	
 }
 
+
 void drawDesert(){
 	static Object desert("obj/desert.obj", sandTex);
 	for (int i = 0; i < 5; i++){
@@ -102,6 +103,8 @@ void drawDesert(){
 			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
 		}
 	}
+	static Object skybox("obj/dome2.obj", skyTex);
+	skybox.drawObject(eye, center, up, glm::vec3(0.0f,0.0f,50.0f), glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
 }
 
 // First Person Perspecitve
@@ -114,7 +117,6 @@ void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotati
 	//std::cout << "X:" << x_cursor << std::endl;
 	//std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
 }
-
 
 
 //Drawing procedure
@@ -138,7 +140,7 @@ int main(void)
 		exit(EXIT_FAILURE); 
 	}
 
-	window = glfwCreateWindow(x_window, y_window, "OpenGL", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
+	window = glfwCreateWindow(x_window, y_window, "Worm Raider", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
 
 
 	if (!window) //If no window is opened then close the program
