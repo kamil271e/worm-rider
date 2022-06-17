@@ -16,7 +16,7 @@ float x_change = 0;
 float z_change = 0;
 
 int w_pressed=0, a_pressed=0, d_pressed=0;
-void update_movement(){
+void updateMovement(){
 	if (w_pressed && z_speed <= z_max_speed) z_speed += 1.5*PI/100;                         // do przodu
 	else if (!w_pressed && z_speed > 0) z_speed -= 1.5*PI/20;                               // zwalnianie
 	else if (z_speed < 0) z_speed = 0;                                                      // zatrzymywanie

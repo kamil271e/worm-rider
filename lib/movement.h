@@ -20,6 +20,6 @@ extern float y_window;
 extern float x_change;
 extern float z_change;
 
-void update_movement();
+void updateMovement();
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

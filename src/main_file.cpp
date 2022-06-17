@@ -15,11 +15,11 @@
 #include "../lib/shaderprogram.h"
 #include "../lib/myCube.h"
 #include "../lib/utils.h"
+#include "../lib/OBJ_loader.h"
+#include "../lib/movement.h"
 #include "coin.cpp"
 #include "worm.cpp"
-#include "../lib/OBJ_loader.h"
 #include "object.cpp"
-#include "../lib/movement.h"
 
 glm::vec3 eye;
 glm::vec3 center;
@@ -34,11 +34,6 @@ float desert_size = 15.0f;
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
-}
-
-void scroll_callback(GLFWwindow* window, double xOffset, double yOffset){
-	if (yOffset < 0) z_speed = -1.5*PI;
-	else z_speed = 1.5*PI;
 }
 
 void initCoins(){
@@ -60,8 +55,6 @@ void initOpenGLProgram(GLFWwindow* window) {
 	glEnable(GL_DEPTH_TEST);
 	
 	glfwSetKeyCallback(window, key_callback);
-	glfwSetScrollCallback(window, scroll_callback);
-
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 }
 
@@ -103,28 +96,26 @@ void drawDesert(){
 			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
 		}
 	}
-	static Object skybox("obj/dome2.obj", skyTex);
-	skybox.drawObject(eye, center, up, glm::vec3(0.0f,0.0f,50.0f), glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
-}
-
-// First Person Perspecitve
-void FPP(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation){
 	
-	worm.drawWorm(eye, center, up, worm_rotation, spLambert);
-	drawCoins(coin_rotation);
-	drawDesert();
-	glfwGetCursorPos(window, &x_cursor, &y_cursor);
-	//std::cout << "X:" << x_cursor << std::endl;
-	//std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
 }
 
+void drawSkyBox(){
+	static Object skybox("obj/dome.obj", skyTex);
+	skybox.drawObject(eye, center, up, glm::vec3(0.0f,0.0f,30.0f), glm::vec3(0.0f), glm::vec3(0.3f), spLambertTextured);
+}
 
 //Drawing procedure
 void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_rotation) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	FPP(window, coin_rotation, worm_rotation);
+	worm.drawWorm(eye, center, up, worm_rotation, spLambert);
+	drawCoins(coin_rotation);
+	drawDesert();
+	drawSkyBox();
+	glfwGetCursorPos(window, &x_cursor, &y_cursor);
+	//std::cout << "X:" << x_cursor << std::endl;
+	//std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
 
 	glfwSwapBuffers(window);	
 }
@@ -189,7 +180,7 @@ int main(void)
 
 		glfwSetTime(0);
 		updateCamera();
-		update_movement();
+		updateMovement();
 		drawScene(window, coin_rotate_angle, worm_rotation);
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
