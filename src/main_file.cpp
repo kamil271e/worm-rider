@@ -25,7 +25,7 @@ glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 
-GLuint sandTex, goldTex, skyTex;
+GLuint sandTex, goldTex, skyTex, skinTex, furTex;
 std::vector<Coin> CoinVector;
 Worm worm;
 objl::Loader loader;
@@ -50,6 +50,9 @@ void initOpenGLProgram(GLFWwindow* window) {
 	goldTex = readTexture("tex/gold.png");
 	sandTex = readTexture("tex/pink_sand.png"); // lepiej cos ciemniejszego
 	skyTex = readTexture("tex/red_sky.png");
+	skinTex = readTexture("tex/worm_skin.png");
+	furTex = readTexture("tex/fur.png");
+	
 	initShaders();
 	initCoins();
 	glEnable(GL_DEPTH_TEST);
@@ -109,7 +112,7 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	worm.drawWorm(eye, center, up, worm_rotation, spLambert);
+	worm.drawWorm(eye, center, up, worm_rotation, spLambert, skinTex, furTex);
 	drawCoins(coin_rotation);
 	drawDesert();
 	drawSkyBox();
@@ -131,7 +134,7 @@ int main(void)
 		exit(EXIT_FAILURE); 
 	}
 
-	window = glfwCreateWindow(x_window, y_window, "Worm Raider", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
+	window = glfwCreateWindow(x_window, y_window, "Worm Rider", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
 
 
 	if (!window) //If no window is opened then close the program

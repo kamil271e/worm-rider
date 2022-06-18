@@ -10,7 +10,7 @@ class Worm{
     public:
         Worm();
         ~Worm();
-        void drawWorm(glm::vec3, glm::vec3, glm::vec3, std::vector<float>, ShaderProgram*);
+        void drawWorm(glm::vec3, glm::vec3, glm::vec3, std::vector<float>, ShaderProgram*, GLuint skinTex, GLuint furTex);
 };
 
 #endif

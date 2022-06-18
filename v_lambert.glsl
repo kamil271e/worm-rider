@@ -5,25 +5,41 @@ uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
 
-
-uniform vec4 color=vec4(1,1,1,1);
-uniform vec4 lightDir=vec4(0,0,1,0);
+uniform float maxFurLength;
+uniform float maxLayer;
 
 //Atrybuty
-layout (location=0) in vec4 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
-layout (location=1) in vec4 normal; //wektor normalny w wierzcholku
-
+in vec4 vertex; //wspolrzedne wierzcholka w przestrzeni modelu
+in vec4 color; //kolor związany z wierzchołkiem
+in vec4 normal; //wektor normalny w przestrzeni modelu
+in vec2 texCoord0;
 
 //Zmienne interpolowane
-out vec4 i_color;
+out vec4 ic;
+out vec4 l;
+out vec4 n;
+out vec4 v;
+out vec2 iTexCoord0;
+out vec2 iTexCoord1;
+
+out float layer;
 
 void main(void) {
-    gl_Position=P*V*M*vertex;
+    vec4 lp = vec4(0, 0, -6, 1); //przestrzeń świata
+    l = normalize(V * lp - V*M*vertex); //wektor do światła w przestrzeni oka
+    v = normalize(vec4(0, 0, 0, 1) - V * M * vertex); //wektor do obserwatora w przestrzeni oka
+    n = normalize(V * M * normal); //wektor normalny w przestrzeni oka
+    iTexCoord0 = texCoord0;
+    iTexCoord1 = (n.xy + 1) / 2;
+    ic = color;
 
-    mat4 G=mat4(inverse(transpose(mat3(M))));
-    vec4 n=normalize(V*G*normal);
+    //vec4 vGravity=vec4(0,-0.2,0,0);
+    //vGravity = inverse(M)*vGravity;
 
-    float nl=clamp(dot(n,lightDir),0,1);
+    //gl_Position=P*V*M*vertex;
 
-    i_color=vec4(color.rgb*nl,color.a);
+	layer=gl_InstanceID;
+	vec4 nv=vertex+(layer*maxFurLength/maxLayer)*normalize(normal);
+    //nv = nv + vGravity*pow(layer/maxLayer,3);
+	gl_Position=P*V*M*nv;
 }
