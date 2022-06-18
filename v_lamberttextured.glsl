@@ -21,7 +21,7 @@ out float i_nl;
 //fog
 out float visibility;
 const float density = 0.03;
-const float gradient = 1.5;
+const float gradient = 3;
 
 void main(void) {
     gl_Position=P*V*M*vertex;
