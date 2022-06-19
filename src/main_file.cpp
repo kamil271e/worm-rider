@@ -20,13 +20,15 @@
 #include "coin.cpp"
 #include "worm.cpp"
 #include "object.cpp"
+#include "skull.cpp"
 
 glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 
-GLuint sandTex, goldTex, skyTex, skinTex, furTex;
-std::vector<Coin> CoinVector;
+GLuint sandTex, goldTex, skyTex, skinTex, furTex, boneTex;
+std::vector<Coin> coinVector;
+std::vector<Skull> skullVector;
 Worm worm;
 objl::Loader loader;
 float desert_size = 15.0f;
@@ -41,8 +43,15 @@ void initCoins(){
 	float init_z[3] = {20.0f, 30.0f, 40.0f};
 	for (int i = 0; i <3; i++){
 		Coin coin(init_x[i], init_z[i], 0.0f, goldTex);
-		CoinVector.push_back(coin);
+		coinVector.push_back(coin);
 	}
+}
+
+void initSkulls(){
+	float init_x = -5.0f;
+	float init_z = 20.0f;
+	Skull skull(init_x, init_z, boneTex);
+	skullVector.push_back(skull);
 }
 
 //Initialization code procedure
@@ -52,9 +61,11 @@ void initOpenGLProgram(GLFWwindow* window) {
 	skyTex = readTexture("tex/red_sky.png");
 	skinTex = readTexture("tex/worm_skin.png");
 	furTex = readTexture("tex/fur.png");
+	boneTex = readTexture("tex/bone.png");
 	
 	initShaders();
 	initCoins();
+	initSkulls();
 	glEnable(GL_DEPTH_TEST);
 	
 	glfwSetKeyCallback(window, key_callback);
@@ -77,17 +88,30 @@ void updateCamera(){
 
 void drawCoins(float coin_rotation){
 	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
-		CoinVector[i].rotation = coin_rotation;
-		if (!CoinVector[i].drawCoin(eye, center, up, spPhong)){
+		coinVector[i].rotation = coin_rotation;
+		if (!coinVector[i].drawCoin(eye, center, up, spPhong)){
 			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[N-8f,N+8f), z:[N,N+20f),
 			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
-			remove(CoinVector, i); 
-			float temp_x = randomNum(CoinVector.back().x-8.0f, CoinVector.back().x+8.0f);
-			float temp_z = randomNum(CoinVector.back().z, CoinVector.back().z+20.f);
+			remove(coinVector, i); 
+			float temp_x = randomNum(eye.x-8.0f, eye.x+8.0f);
+			float temp_z = randomNum(coinVector.back().z+2.0f, coinVector.back().z+20.f);
 			Coin temp_coin(temp_x, temp_z, coin_rotation, goldTex, skyTex);
-			CoinVector.push_back(temp_coin);
+			coinVector.push_back(temp_coin);
 		}
 	}	
+}
+
+void drawSkulls(){
+	//static Object skull2("obj/skull.obj", boneTex);
+	//skull2.drawObject(eye, center, up, glm::vec3(0.0f,-0.5f,20.0f), glm::vec3(5.0f,0.0f,10.0f), glm::vec3(0.1f), spLambertTextured);
+
+	if(!skullVector[0].drawSkull(eye, center, up, spLambertTextured)){
+		remove(skullVector, 0);
+		float temp_x = randomNum(eye.x-8.0f, eye.x+8.0f);
+		float temp_z = eye.z+70.0f;
+		Skull temp_skull(temp_x, temp_z, boneTex);
+		skullVector.push_back(temp_skull);
+	}
 }
 
 
@@ -114,9 +138,11 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 
 	worm.drawWorm(eye, center, up, worm_rotation, spLambert, skinTex, furTex);
 	drawCoins(coin_rotation);
+	drawSkulls();
 	drawDesert();
 	drawSkyBox();
 	glfwGetCursorPos(window, &x_cursor, &y_cursor);
+	
 	//std::cout << "X:" << x_cursor << std::endl;
 	//std::cout << "(X:" << eye.x << ", Y:" << eye.y << ", Z:" << eye.z << ")" << std::endl;
 
