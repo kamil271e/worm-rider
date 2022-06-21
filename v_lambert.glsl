@@ -33,13 +33,13 @@ void main(void) {
     iTexCoord1 = (n.xy + 1) / 2;
     ic = color;
 
-    //vec4 vGravity=vec4(0,-0.2,0,0);
-    //vGravity = inverse(M)*vGravity;
+    vec4 vGravity=vec4(0,-0.2,0,0);
+    vGravity = inverse(M)*vGravity;
 
     //gl_Position=P*V*M*vertex;
 
 	layer=gl_InstanceID;
 	vec4 nv=vertex+(layer*maxFurLength/maxLayer)*normalize(normal);
-    //nv = nv + vGravity*pow(layer/maxLayer,3);
+    nv = nv + vGravity*pow(layer/maxLayer,3);
 	gl_Position=P*V*M*nv;
 }
