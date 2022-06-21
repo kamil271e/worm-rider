@@ -1,11 +1,13 @@
 #include <random>
 #include <vector>
 #include "coin.h"
+#include "skull.h"
 
 // funkcja pomocnicza - usuwanie danego elementu w wektorze
-void remove(std::vector<Coin>& vec, size_t pos)
+template <class T>
+void remove(T& vec, size_t pos)
 {
-    std::vector<Coin>::iterator it = vec.begin();
+    class T::iterator it = vec.begin();
     std::advance(it, pos);
     vec.erase(it);
 }
