@@ -21,6 +21,7 @@
 #include "worm.cpp"
 #include "object.cpp"
 #include "skull.cpp"
+#include "spaceship.cpp"
 
 glm::vec3 eye;
 glm::vec3 center;
@@ -29,9 +30,14 @@ glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 GLuint sandTex, goldTex, skyTex, skinTex, furTex, boneTex;
 std::vector<Coin> coinVector;
 std::vector<Skull> skullVector;
+std::vector<Spaceship> spaceshipVector;
 Worm worm;
 objl::Loader loader;
 float desert_size = 15.0f;
+
+const int nr_of_spaceships = 3;
+float enemy_max_x=15, enemy_min_z=100, enemy_max_z=150;
+float enemy_speed = 5.0f;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -54,6 +60,15 @@ void initSkulls(){
 	skullVector.push_back(skull);
 }
 
+void initSpaceships(){
+	for (int i=0; i<nr_of_spaceships; i++){
+		float init_x = randomNum(eye.x-enemy_max_x, eye.x+enemy_max_x);
+		float init_z = randomNum(eye.z+enemy_min_z, eye.z+enemy_max_z);
+		Spaceship tempSpaceship(init_x, init_z, boneTex);
+		spaceshipVector.push_back(tempSpaceship);
+	}
+}
+
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	goldTex = readTexture("tex/gold.png");
@@ -66,6 +81,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	initShaders();
 	initCoins();
 	initSkulls();
+	initSpaceships();
 	glEnable(GL_DEPTH_TEST);
 	
 	glfwSetKeyCallback(window, key_callback);
@@ -114,6 +130,17 @@ void drawSkulls(){
 	}
 }
 
+void drawSpaceships(){
+	for (int i=0; i<nr_of_spaceships; i++){
+		if(!spaceshipVector[i].drawSpaceship(eye, center, up, spaceshipVector[i].z_change, spLambertTextured)){
+			remove(spaceshipVector, i);
+			float temp_x = randomNum(eye.x-enemy_max_x, eye.x+enemy_max_x);
+			float temp_z = randomNum(eye.z+enemy_min_z, eye.z+enemy_max_z);
+			Spaceship tempSpaceship(temp_x, temp_z, boneTex);
+			spaceshipVector.push_back(tempSpaceship);
+		}
+	}
+}
 
 void drawDesert(){
 	static Object desert("obj/desert.obj", sandTex);
@@ -139,6 +166,7 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 	worm.drawWorm(eye, center, up, worm_rotation, spLambert, skinTex, furTex);
 	drawCoins(coin_rotation);
 	drawSkulls();
+	drawSpaceships();
 	drawDesert();
 	drawSkyBox();
 	glfwGetCursorPos(window, &x_cursor, &y_cursor);
@@ -189,6 +217,7 @@ int main(void)
 		// ruch w osi x i z
 		x_change += x_speed * glfwGetTime();
 		z_change += z_speed * glfwGetTime();
+		for (int i=0; i<nr_of_spaceships; i++) spaceshipVector[i].z_change -= enemy_speed * glfwGetTime();
 		
 		// rotacja monet
 		coin_rotate_angle += coin_rotate_speed * glfwGetTime();

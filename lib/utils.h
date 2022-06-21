@@ -2,6 +2,7 @@
 #include <vector>
 #include "coin.h"
 #include "skull.h"
+#include "spaceship.h"
 
 // funkcja pomocnicza - usuwanie danego elementu w wektorze
 template <class T>
