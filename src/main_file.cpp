@@ -36,6 +36,8 @@ objl::Loader loader;
 float desert_size = 15.0f;
 
 const int nr_of_spaceships = 3;
+const int nr_of_skulls = 1;
+const int nr_of_coins = 3;
 float enemy_max_x=15, enemy_min_z=100, enemy_max_z=150;
 float enemy_speed = 5.0f;
 
@@ -45,12 +47,14 @@ void error_callback(int error, const char* description) {
 }
 
 void initCoins(){
-	float init_x[3] = {5.0f,-3.0f,0.0f};
-	float init_z[3] = {20.0f, 30.0f, 40.0f};
-	for (int i = 0; i <3; i++){
+	float* init_x = new float[nr_of_coins] {5.0f,-3.0f,0.0f};
+	float* init_z = new float[nr_of_coins] {20.0f, 30.0f, 40.0f};
+	for (int i = 0; i < nr_of_coins; i++){
 		Coin coin(init_x[i], init_z[i], 0.0f, goldTex);
 		coinVector.push_back(coin);
 	}
+	delete[] init_x;
+	delete[] init_z;
 }
 
 void initSkulls(){
@@ -106,11 +110,12 @@ void drawCoins(float coin_rotation){
 	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
 		coinVector[i].rotation = coin_rotation;
 		if (!coinVector[i].drawCoin(eye, center, up, spPhong)){
-			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[N-8f,N+8f), z:[N,N+20f),
+			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[E-6f,E+6f), z:[N+10f,N+20f),
 			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
+			// E pozycja oka
 			remove(coinVector, i); 
-			float temp_x = randomNum(eye.x-8.0f, eye.x+8.0f);
-			float temp_z = randomNum(coinVector.back().z+2.0f, coinVector.back().z+20.f);
+			float temp_x = randomNum(eye.x-6.0f, eye.x+6.0f);
+			float temp_z = randomNum(coinVector.back().z+10.0f, coinVector.back().z+20.f);
 			Coin temp_coin(temp_x, temp_z, coin_rotation, goldTex, skyTex);
 			coinVector.push_back(temp_coin);
 		}
