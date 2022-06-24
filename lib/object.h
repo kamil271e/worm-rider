@@ -10,7 +10,7 @@ class Object{
         GLuint tex, tex_reflect;
         Object(std::string, GLuint=0, GLuint=0, bool=false);
         ~Object();
-        void drawObject(glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, ShaderProgram*);
+        void drawObject(glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, glm::vec3, ShaderProgram*, bool=false);
 };
 
 #endif

@@ -45,7 +45,8 @@ Object::Object(std::string path, GLuint tex, GLuint tex_reflect, bool inside){
 
 Object::~Object(){}
 
-void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, glm::vec3 coords, glm::vec3 rot, glm::vec3 scal, ShaderProgram* sp){
+void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, glm::vec3 coords, glm::vec3 rot, glm::vec3 scal,
+						ShaderProgram* sp, bool strip){
     glm::mat4 V=glm::lookAt(eye, center, up);
     glm::mat4 P=glm::perspective(50.0f*PI/180.0f, 1.0f, 0.01f, 50.0f); //Wylicz macierz rzutowania
 	glm::mat4 M=glm::mat4(1.0f);
@@ -77,7 +78,8 @@ void Object::drawObject(glm::vec3 eye, glm::vec3 center, glm::vec3 up, glm::vec3
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D,tex_reflect);
 
-    glDrawArrays(GL_TRIANGLES,0,vertexCount); //Narysuj obiekt
+	if (!strip) {glDrawArrays(GL_TRIANGLES,0,vertexCount);} //Narysuj obiekt
+    else {glDrawArrays(GL_TRIANGLE_STRIP,0,vertexCount);} //Narysuj obiekt
 
     glDisableVertexAttribArray(sp->a("vertex"));
 	glDisableVertexAttribArray(sp->a("normal"));

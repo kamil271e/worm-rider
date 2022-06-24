@@ -27,7 +27,7 @@ glm::vec3 eye;
 glm::vec3 center;
 glm::vec3 up = glm::vec3(glm::vec3(0.0f, 5.0f, 0.0f));
 
-GLuint sandTex, goldTex, skyTex, skinTex, furTex, boneTex;
+GLuint sandTex, goldTex, skyTex, skinTex, furTex, boneTex, shipTex;
 std::vector<Coin> coinVector;
 std::vector<Skull> skullVector;
 std::vector<Spaceship> spaceshipVector;
@@ -35,11 +35,11 @@ Worm worm;
 objl::Loader loader;
 float desert_size = 15.0f;
 
-const int nr_of_spaceships = 3;
+const int nr_of_spaceships = 10;
 const int nr_of_skulls = 1;
 const int nr_of_coins = 3;
-float enemy_max_x=15, enemy_min_z=100, enemy_max_z=150;
-float enemy_speed = 5.0f;
+float enemy_max_x=15, enemy_min_z=100, enemy_max_z=300;
+float enemy_speed = 8.0f;
 
 //Error processing callback procedure
 void error_callback(int error, const char* description) {
@@ -68,7 +68,7 @@ void initSpaceships(){
 	for (int i=0; i<nr_of_spaceships; i++){
 		float init_x = randomNum(eye.x-enemy_max_x, eye.x+enemy_max_x);
 		float init_z = randomNum(eye.z+enemy_min_z, eye.z+enemy_max_z);
-		Spaceship tempSpaceship(init_x, init_z, boneTex);
+		Spaceship tempSpaceship(init_x, init_z, shipTex);
 		spaceshipVector.push_back(tempSpaceship);
 	}
 }
@@ -81,6 +81,7 @@ void initOpenGLProgram(GLFWwindow* window) {
 	skinTex = readTexture("tex/worm_skin.png");
 	furTex = readTexture("tex/fur.png");
 	boneTex = readTexture("tex/bone.png");
+	shipTex = readTexture("tex/spaceship.png");
 	
 	initShaders();
 	initCoins();
