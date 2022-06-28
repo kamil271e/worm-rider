@@ -4,6 +4,13 @@
 #include "model.h"
 #include <glm/glm.hpp>
 
+int coin_collecting(bool print=true){
+    static int i = 0;
+    i++;
+    if (print) std::cout<<"You collected a "<<i<<" coin!"<<std::endl;
+    return i-1;
+}
+
 class Coin{
     public:
         float x, z, rotation;

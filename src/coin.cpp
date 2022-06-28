@@ -20,10 +20,16 @@ bool Coin::drawCoin(glm::vec3 eye, glm::vec3 center, glm::vec3 up, ShaderProgram
     float distance_to_coin = glm::sqrt(glm::pow(x-eye.x,2) + glm::pow(z-eye.z,2)); 
     if (eye.z - z > 7.5){ // coin nie zostal zebrany - rysuje nowego
         c.drawObject(eye, center, up, glm::vec3(x,1.0f,z), glm::vec3(1.5f, 0, rotation), glm::vec3(0.6f), sp);
+        return false;
     }
-    else if ( distance_to_coin > 7.5){
+    else if ( distance_to_coin > 3){ // coin jest daleko
        	c.drawObject(eye, center, up, glm::vec3(x,1.0f,z), glm::vec3(1.5f, 0, rotation), glm::vec3(0.6f), sp);
         return true;
     }
-    return false; // usuwanie coina
+    else{   // zebranie (i usuwanie) coina
+        coin_collecting();
+        return false;
+    }
 }
+
+
