@@ -142,7 +142,7 @@ void drawSpaceships(){
 			remove(spaceshipVector, i);
 			float temp_x = randomNum(eye.x-enemy_max_x, eye.x+enemy_max_x);
 			float temp_z = randomNum(eye.z+enemy_min_z, eye.z+enemy_max_z);
-			Spaceship tempSpaceship(temp_x, temp_z, boneTex);
+			Spaceship tempSpaceship(temp_x, temp_z, shipTex);
 			spaceshipVector.push_back(tempSpaceship);
 		}
 	}
