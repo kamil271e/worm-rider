@@ -47,14 +47,14 @@ void error_callback(int error, const char* description) {
 }
 
 void initCoins(){
-	float* init_x = new float[nr_of_coins] {5.0f,-3.0f,0.0f};
-	float* init_z = new float[nr_of_coins] {20.0f, 30.0f, 40.0f};
+	float last_z = 10.0f;
 	for (int i = 0; i < nr_of_coins; i++){
-		Coin coin(init_x[i], init_z[i], 0.0f, goldTex);
+		float init_x = randomNum(eye.x-6.0f, eye.x+6.0f);
+		float init_z = last_z;
+		last_z+=15.0f;
+		Coin coin(init_x, init_z, 0.0f, goldTex, skyTex);
 		coinVector.push_back(coin);
 	}
-	delete[] init_x;
-	delete[] init_z;
 }
 
 void initSkulls(){
@@ -76,7 +76,7 @@ void initSpaceships(){
 //Initialization code procedure
 void initOpenGLProgram(GLFWwindow* window) {
 	goldTex = readTexture("tex/gold.png");
-	sandTex = readTexture("tex/pink_sand.png"); // lepiej cos ciemniejszego
+	sandTex = readTexture("tex/pink_sand.png"); // Something darker might be better
 	skyTex = readTexture("tex/red_sky.png");
 	skinTex = readTexture("tex/worm_skin.png");
 	furTex = readTexture("tex/fur.png");
@@ -99,7 +99,10 @@ void freeOpenGLProgram(GLFWwindow* window) {
 	glDeleteTextures(1,&goldTex);
 	glDeleteTextures(1,&sandTex);
 	glDeleteTextures(1,&skyTex);
-	//************Place any code here that needs to be executed once, after the main loop ends************
+	glDeleteTextures(1,&skinTex);
+	glDeleteTextures(1,&furTex);
+	glDeleteTextures(1,&boneTex);
+	glDeleteTextures(1,&shipTex);
 }
 
 void updateCamera(){
@@ -108,12 +111,12 @@ void updateCamera(){
 }
 
 void drawCoins(float coin_rotation){
-	for (int i = 0; i < 3; i++){ // 3 coiny jednoczesnie na scenie
+	for (int i = 0; i < nr_of_coins; i++){ // 3 coins simultaneously on scene
 		coinVector[i].rotation = coin_rotation;
 		if (!coinVector[i].drawCoin(eye, center, up, spPhong)){
-			// domyslnie nowo pojawiajace sie monety bede mialy wspolrzedne x:[E-6f,E+6f), z:[N+10f,N+20f),
-			// gdzie N to pozycja ostatniej monety w wektorze (najdalszej od obserwatora)
-			// E pozycja oka
+			// By default, newly appearing coins will have coordinates x:[E-6f,E+6f), z:[N+10f,N+20f),
+			// where N is the position of the last coin in the vector (farthest from the observer)
+			// E - eye position
 			remove(coinVector, i); 
 			float temp_x = randomNum(eye.x-6.0f, eye.x+6.0f);
 			float temp_z = randomNum(coinVector.back().z+10.0f, coinVector.back().z+20.f);
@@ -124,15 +127,14 @@ void drawCoins(float coin_rotation){
 }
 
 void drawSkulls(){
-	//static Object skull2("obj/skull.obj", boneTex);
-	//skull2.drawObject(eye, center, up, glm::vec3(0.0f,-0.5f,20.0f), glm::vec3(5.0f,0.0f,10.0f), glm::vec3(0.1f), spLambertTextured);
-
-	if(!skullVector[0].drawSkull(eye, center, up, spLambertTextured)){
-		remove(skullVector, 0);
-		float temp_x = randomNum(eye.x-8.0f, eye.x+8.0f);
-		float temp_z = eye.z+70.0f;
-		Skull temp_skull(temp_x, temp_z, boneTex);
-		skullVector.push_back(temp_skull);
+	for (int i = 0; i < nr_of_skulls; i++){
+		if(!skullVector[i].drawSkull(eye, center, up, spLambertTextured)){
+			remove(skullVector, 0);
+			float temp_x = randomNum(eye.x-8.0f, eye.x+8.0f);
+			float temp_z = eye.z+70.0f;
+			Skull temp_skull(temp_x, temp_z, boneTex);
+			skullVector.push_back(temp_skull);
+		}
 	}
 }
 
@@ -142,8 +144,8 @@ void drawSpaceships(){
 			remove(spaceshipVector, i);
 			float temp_x = randomNum(eye.x-enemy_max_x, eye.x+enemy_max_x);
 			float temp_z = randomNum(eye.z+enemy_min_z, eye.z+enemy_max_z);
-			Spaceship tempSpaceship(temp_x, temp_z, shipTex);
-			spaceshipVector.push_back(tempSpaceship);
+			Spaceship temp_spaceship(temp_x, temp_z, shipTex);
+			spaceshipVector.push_back(temp_spaceship);
 		}
 	}
 }
@@ -156,7 +158,6 @@ void drawDesert(){
 			desert.drawObject(eye, center, up, pos, glm::vec3(0.0f), glm::vec3(1.0f), spLambertTextured);
 		}
 	}
-	
 }
 
 void drawSkyBox(){
@@ -169,7 +170,7 @@ void drawScene(GLFWwindow* window, float coin_rotation, std::vector<float> worm_
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0, 0, 0.15, 1.0f);
 
-	worm.drawWorm(eye, center, up, worm_rotation, spLambert, skinTex, furTex);
+	worm.drawWorm(eye, center, up, worm_rotation, spLambert, skinTex, furTex); // rysowanie robala
 	drawCoins(coin_rotation);
 	drawSkulls();
 	drawSpaceships();
@@ -187,14 +188,14 @@ int main(void)
 {
 	GLFWwindow* window; //Pointer to object that represents the application window
 
-	glfwSetErrorCallback(error_callback);//Register error processing callback procedure
+	glfwSetErrorCallback(error_callback); //Register error processing callback procedure
 
 	if (!glfwInit()) { //Initialize GLFW library
 		fprintf(stderr, "Can't initialize GLFW.\n");
 		exit(EXIT_FAILURE); 
 	}
 
-	window = glfwCreateWindow(x_window, y_window, "Worm Rider", NULL, NULL);  //Create a window 500pxx500px titled "OpenGL" and an OpenGL context associated with it. 
+	window = glfwCreateWindow(x_window, y_window, "Worm Rider", NULL, NULL);
 
 
 	if (!window) //If no window is opened then close the program
@@ -215,23 +216,23 @@ int main(void)
 
 	//Main application loop
 	float coin_rotate_angle = 0;
-	std::vector <float> worm_rotation(2, 0.0f); // kąty rotacji segmentów robaka
+	std::vector <float> worm_rotation(2, 0.0f); //Rotation angles of the worm segments
 	int flag = 1;
-	glfwSetTime(0);
+	glfwSetTime(0); //Zero the timer
 	while (!glfwWindowShouldClose(window))
 	{		
-		// ruch w osi x i z
+		//Movement in x and z axis
 		x_change += x_speed * glfwGetTime();
 		z_change += z_speed * glfwGetTime();
 		for (int i=0; i<nr_of_spaceships; i++) spaceshipVector[i].z_change -= enemy_speed * glfwGetTime();
 		
-		// rotacja monet
+		//Coin rotation
 		coin_rotate_angle += coin_rotate_speed * glfwGetTime();
 
-		// rotacja segmentów czerwia
+		//Worm segments rotation
 		if (abs(x_speed) > 0.1 || z_speed > 0.1){
 			if (worm_rotation[0] >= PI/6) flag = 0;
-			if (worm_rotation[0] <= -PI/6) flag = 1;
+			else if (worm_rotation[0] <= -PI/6) flag = 1;
 			if (flag){
 				worm_rotation[0] += worm_wriggle_speed * glfwGetTime();
 				worm_rotation[1] -= worm_wriggle_speed * glfwGetTime();
@@ -242,10 +243,10 @@ int main(void)
 			}
 		}
 
-		glfwSetTime(0);
+		glfwSetTime(0); //Zero the timer
 		updateCamera();
 		updateMovement();
-		drawScene(window, coin_rotate_angle, worm_rotation);
+		drawScene(window, coin_rotate_angle, worm_rotation); 
 		glfwPollEvents(); //Process callback procedures corresponding to the events that took place up to now
 	}
 	freeOpenGLProgram(window);

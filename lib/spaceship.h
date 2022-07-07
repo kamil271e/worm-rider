@@ -1,7 +1,6 @@
 #ifndef SPACESHIP_H
 #define SPACESHIP_H
 
-
 #include "model.h"
 #include <glm/glm.hpp>
 

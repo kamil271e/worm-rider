@@ -11,22 +11,20 @@ Coin::Coin(float x, float z, float rotation, GLuint tex, GLuint tex_reflect){
     this->tex_reflect = tex;
 }
 
-Coin::~Coin(){
-    //std::cout << "Coin destroyed" << std::endl;
-}
+Coin::~Coin(){}
 
 bool Coin::drawCoin(glm::vec3 eye, glm::vec3 center, glm::vec3 up, ShaderProgram* sp){
     static Object c("obj/coin.obj", tex, tex_reflect);
     float distance_to_coin = glm::sqrt(glm::pow(x-eye.x,2) + glm::pow(z-eye.z,2)); 
-    if (eye.z - z > 7.5){ // coin nie zostal zebrany - rysuje nowego
+    if (eye.z - z > 7.5){ //Coin has not been collected - draw new one
         c.drawObject(eye, center, up, glm::vec3(x,1.0f,z), glm::vec3(1.5f, 0, rotation), glm::vec3(0.6f), sp);
         return false;
     }
-    else if ( distance_to_coin > 3){ // coin jest daleko
+    else if ( distance_to_coin > 3){ //Coin is far
        	c.drawObject(eye, center, up, glm::vec3(x,1.0f,z), glm::vec3(1.5f, 0, rotation), glm::vec3(0.6f), sp);
         return true;
     }
-    else{   // zebranie (i usuwanie) coina
+    else{   //Collect and deleting coin
         coin_collecting();
         return false;
     }

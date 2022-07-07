@@ -1,10 +1,7 @@
 #include <random>
 #include <vector>
-#include "coin.h"
-#include "skull.h"
-#include "spaceship.h"
 
-// funkcja pomocnicza - usuwanie danego elementu w wektorze
+//Removing specific element in vector
 template <class T>
 void remove(T& vec, size_t pos)
 {
@@ -13,7 +10,7 @@ void remove(T& vec, size_t pos)
     vec.erase(it);
 }
 
-// funkcja pomocnicza - losowanie liczby z przedzialu [a,b)
+//Drawing a number from the interval [a,b)
 float randomNum(float a, float b){
 	return a + (rand() / (RAND_MAX / (b-a)));
 }

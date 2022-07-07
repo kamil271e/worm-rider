@@ -1,6 +1,5 @@
 ﻿#include "../lib/shaderprogram.h"
 
-
 ShaderProgram* spLambert;
 ShaderProgram* spConstant;
 ShaderProgram* spTextured;
@@ -9,20 +8,17 @@ ShaderProgram* spLambertTextured;
 ShaderProgram* spPhong;
 
 void initShaders() {
-	spLambert = new ShaderProgram("v_lambert.glsl", NULL, "f_lambert.glsl");
-	// spConstant = new ShaderProgram("v_constant.glsl", NULL, "f_constant.glsl");
-	spTextured = new ShaderProgram("v_textured.glsl", NULL, "f_textured.glsl");
-	// spColored = new ShaderProgram("v_colored.glsl", NULL, "f_colored.glsl");
-	spLambertTextured = new ShaderProgram("v_lamberttextured.glsl", NULL, "f_lamberttextured.glsl");
-	spPhong = new ShaderProgram("v_simplest.glsl", NULL, "f_simplest.glsl");
+	spLambert = new ShaderProgram("shdr/v_lambert.glsl", NULL, "shdr/f_lambert.glsl");
+	spTextured = new ShaderProgram("shdr/v_textured.glsl", NULL, "shdr/f_textured.glsl");
+	spLambertTextured = new ShaderProgram("shdr/v_lamberttextured.glsl", NULL, "shdr/f_lamberttextured.glsl");
+	spPhong = new ShaderProgram("shdr/v_phong.glsl", NULL, "shdr/f_phong.glsl");
 }
 
 void freeShaders() {
 	delete spLambert;
-	delete spConstant;
 	delete spTextured;
-	delete spColored;
 	delete spLambertTextured;
+	delete spPhong;
 }
 
 //Procedure reads a file into an array of chars

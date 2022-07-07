@@ -5,7 +5,6 @@ uniform mat4 P;
 uniform mat4 V;
 uniform mat4 M;
 
-
 uniform vec4 lightDir=vec4(0,0,1,0);
 
 //Attributes
