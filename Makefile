@@ -4,3 +4,6 @@ FILES=src/cube.cpp  src/lodepng.cpp  src/movement.cpp src/main_file.cpp  src/mod
 
 main_file: $(FILES) $(HEADERS)
 	g++ -o main.out  $(FILES)  $(LIBS) -I.
+
+run:
+	./main.out
